@@ -28,4 +28,4 @@ const busInfo = input
   .slice(2)
   .map((info) => info.trim().split(" ").map(Number));
 
-console.log(n, m, busInfo);
+console.log(1, n, m, busInfo);
