@@ -25,7 +25,52 @@ const input =
 const n = Number(input[0]);
 const m = Number(input[1]);
 const busInfo = input
-  .slice(2)
+  .slice(2, m + 2)
   .map((info) => info.trim().split(" ").map(Number));
+const [start, end] = input[m + 2].trim().split(" ").map(Number);
 
-console.log(n, m, busInfo);
+const INF = Infinity;
+const visited = Array(n + 1).fill(false);
+const dist = Array(n + 1).fill(INF);
+const graph = Array.from({ length: n + 1 }, () => []);
+for (let i = 0; i < m; i++) {
+  const [a, b, c] = busInfo[i];
+  graph[a].push([b, c]);
+}
+
+const getMinIndex = () => {
+  let minValue = INF;
+  let index = 0;
+  for (let i = 0; i <= n; i++) {
+    if (minValue > dist[i] && !visited[i]) {
+      minValue = dist[i];
+      index = i;
+    }
+  }
+
+  return index;
+};
+
+const dijkstra = (start) => {
+  dist[start] = 0;
+  visited[start] = true;
+
+  for (let [adj, cost] of graph[start]) {
+    dist[adj] = cost;
+  }
+
+  for (let i = 0; i < n - 1; i++) {
+    let cur = getMinIndex();
+    visited[cur] = true;
+    for (let [adj, cost] of graph[cur]) {
+      let totalCost = dist[cur] + cost;
+      if (dist[adj] > totalCost) {
+        dist[adj] = totalCost;
+      }
+    }
+  }
+};
+
+dijkstra(start);
+
+console.log(dist[end]);
