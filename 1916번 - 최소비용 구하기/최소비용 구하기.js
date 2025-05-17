@@ -21,7 +21,6 @@ const input =
         .trim()
         .split("\n");
 
-// 문제별 로직 작성
 const n = Number(input[0]);
 const m = Number(input[1]);
 const busInfo = input
@@ -33,44 +32,138 @@ const INF = Infinity;
 const visited = Array(n + 1).fill(false);
 const dist = Array(n + 1).fill(INF);
 const graph = Array.from({ length: n + 1 }, () => []);
+
 for (let i = 0; i < m; i++) {
   const [a, b, c] = busInfo[i];
   graph[a].push([b, c]);
 }
 
-const getMinIndex = () => {
-  let minValue = INF;
-  let index = 0;
-  for (let i = 0; i <= n; i++) {
-    if (minValue > dist[i] && !visited[i]) {
-      minValue = dist[i];
-      index = i;
+/**
+ * 우선순위 큐 적용 X
+ */
+
+// const getMinIndex = () => {
+//   let minValue = INF;
+//   let index = 0;
+//   for (let i = 0; i <= n; i++) {
+//     if (minValue > dist[i] && !visited[i]) {
+//       minValue = dist[i];
+//       index = i;
+//     }
+//   }
+
+//   return index;
+// };
+
+// const dijkstra = (start) => {
+//   dist[start] = 0;
+//   visited[start] = true;
+
+//   for (let [adj, cost] of graph[start]) {
+//     dist[adj] = Math.min(dist[adj], cost);
+//   }
+
+//   for (let i = 0; i < n - 1; i++) {
+//     let cur = getMinIndex();
+//     visited[cur] = true;
+//     for (let [adj, cost] of graph[cur]) {
+//       let totalCost = dist[cur] + cost;
+//       if (dist[adj] > totalCost) {
+//         dist[adj] = totalCost;
+//       }
+//     }
+//   }
+// };
+
+// dijkstra(start);
+
+// console.log(dist[end]);
+
+/**
+ * 우선순위 큐 적용 O
+ */
+class PriorityQueue {
+  constructor() {
+    this.heap = [];
+  }
+
+  enqueue(value, priority) {
+    this.heap.push({ value, priority });
+    this.heapifyUp(this.heap.length - 1);
+  }
+
+  heapifyUp(index) {
+    while (index > 0) {
+      const parentIndex = (index - 1) >> 1;
+      if (this.heap[parentIndex].priority <= this.heap[index].priority) break;
+      [this.heap[parentIndex], this.heap[index]] = [
+        this.heap[index],
+        this.heap[parentIndex],
+      ];
+      index = parentIndex;
     }
   }
 
-  return index;
-};
+  dequeue() {
+    const min = this.heap[0];
+    const end = this.heap.pop();
+    if (this.heap.length > 0) {
+      this.heap[0] = end;
+      this.heapifyDown(0);
+    }
 
-const dijkstra = (start) => {
-  dist[start] = 0;
-  visited[start] = true;
-
-  for (let [adj, cost] of graph[start]) {
-    dist[adj] = cost;
+    return min;
   }
 
-  for (let i = 0; i < n - 1; i++) {
-    let cur = getMinIndex();
-    visited[cur] = true;
-    for (let [adj, cost] of graph[cur]) {
-      let totalCost = dist[cur] + cost;
+  heapifyDown(index) {
+    while (index < this.heap.length) {
+      const left = (index << 1) + 1;
+      const right = (index << 1) + 2;
+      let smallest = index;
+      if (
+        this.heap[left] &&
+        this.heap[left].priority < this.heap[smallest].priority
+      ) {
+        smallest = left;
+      }
+      if (
+        this.heap[right] &&
+        this.heap[right].priority < this.heap[smallest].priority
+      ) {
+        smallest = right;
+      }
+
+      if (smallest === index) break;
+      [this.heap[index], this.heap[smallest]] = [
+        this.heap[smallest],
+        this.heap[index],
+      ];
+      index = smallest;
+    }
+  }
+
+  isEmpty() {
+    return this.heap.length === 0;
+  }
+}
+
+const dijkstra = (start) => {
+  const queue = new PriorityQueue();
+  queue.enqueue(start, 0);
+  dist[start] = 0;
+  console.log(queue);
+  while (!queue.isEmpty()) {
+    let { value, priority } = queue.dequeue();
+    if (dist[value] < priority) continue;
+    for (let [adj, cost] of graph[value]) {
+      let totalCost = dist[value] + cost;
       if (dist[adj] > totalCost) {
         dist[adj] = totalCost;
+        queue.enqueue(adj, totalCost);
       }
     }
   }
 };
 
 dijkstra(start);
-
 console.log(dist[end]);
