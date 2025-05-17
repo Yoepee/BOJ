@@ -151,7 +151,6 @@ const dijkstra = (start) => {
   const queue = new PriorityQueue();
   queue.enqueue(start, 0);
   dist[start] = 0;
-  console.log(queue);
   while (!queue.isEmpty()) {
     let { value, priority } = queue.dequeue();
     if (dist[value] < priority) continue;
